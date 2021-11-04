@@ -90,6 +90,7 @@ public class BookListMainActivity extends AppCompatActivity {
                 return textView_name;
             }
 
+            //创建菜单
             @Override
             public void onCreateContextMenu(ContextMenu contextMenu,View view,ContextMenu.ContextMenuInfo contextMenuInfo){
                 MenuItem addMt=contextMenu.add(Menu.NONE,1,1,"Add");
@@ -100,11 +101,12 @@ public class BookListMainActivity extends AppCompatActivity {
                 delMt.setOnMenuItemClickListener(this);
             }
 
+            //回调函数
             @Override
             public boolean onMenuItemClick(MenuItem menuItem){
                 int position=getAdapterPosition();
                 switch(menuItem.getItemId()){
-                    case 1:
+                    case 1://添加书籍
                         View addView=LayoutInflater.from(BookListMainActivity.this).inflate(R.layout.add_item,null);
                         AlertDialog.Builder addBulier=new AlertDialog.Builder(BookListMainActivity.this);
                         addBulier.setView(addView);
@@ -116,33 +118,31 @@ public class BookListMainActivity extends AppCompatActivity {
                                 EditText editImage=addView.findViewById(R.id.edit_text_imageName);
                                 Context baseContext=getBaseContext();
                                 int id = getResources().getIdentifier(baseContext.getPackageName() + ":drawable/" + editImage.getText().toString(), null, null);
-                                if (id == 0){
+                                if (id == 0){//资源不存在则提示错误
                                     AlertDialog.Builder error=new AlertDialog.Builder( BookListMainActivity.this);
                                     error.setTitle("Warning");
                                     error.setMessage("Error!Fail To Add");
                                     error.setPositiveButton("Sure", new DialogInterface.OnClickListener() {
                                         @Override
                                         public void onClick(DialogInterface dialog, int which) {
-
                                         }
                                     });
                                     error.create().show();
                                 }else{
                                     books.add(position+1,new Book(editName.getText().toString(),id));
                                     MyRecyclerViewAdapter.this.notifyItemInserted(position+1);
-                                    Toast.makeText(BookListMainActivity.this,"Success To Add",Toast.LENGTH_LONG).show();
+                                    Toast.makeText(BookListMainActivity.this,"Succeed To Add",Toast.LENGTH_LONG).show();
                                 }
                             }
                         });
                         addBulier.setCancelable(false).setNegativeButton("Esc", new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
-
                             }
                         });
                         addBulier.create().show();
                         break;
-                    case 2:
+                    case 2://删除书籍
                         AlertDialog.Builder delBuiler=new AlertDialog.Builder(BookListMainActivity.this);
                         delBuiler.setTitle("Remind");
                         delBuiler.setMessage("Sure To Delete?");
@@ -163,7 +163,7 @@ public class BookListMainActivity extends AppCompatActivity {
                         delBuiler.create().show();
                         break;
                 }
-                notifyDataSetChanged();
+                notifyDataSetChanged();//刷新页面
                 return false;
             }
         }
