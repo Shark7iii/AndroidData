@@ -1,17 +1,25 @@
 package com.jnu.booklistmainactivity;
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.content.Context;
+import android.content.DialogInterface;
 import android.os.Bundle;
+import android.view.ContextMenu;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.EditText;
 import android.widget.ImageView;
 
 import android.widget.TextView;
+import android.widget.Toast;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -63,7 +71,7 @@ public class BookListMainActivity extends AppCompatActivity {
             return books.size();
         }
 
-        private class myViewHolder extends RecyclerView.ViewHolder {
+        private class myViewHolder extends RecyclerView.ViewHolder implements View.OnCreateContextMenuListener, MenuItem.OnMenuItemClickListener{
             private final ImageView imageView;
             private final TextView textView_name;
 
@@ -71,6 +79,7 @@ public class BookListMainActivity extends AppCompatActivity {
                 super(view);
                 this.imageView=view.findViewById(R.id.image_view_book_cover);
                 this.textView_name =view.findViewById(R.id.text_view_book_title);
+                view.setOnCreateContextMenuListener(this);
             }
 
             public ImageView getImageView() {
@@ -79,6 +88,83 @@ public class BookListMainActivity extends AppCompatActivity {
 
             public TextView getTextView_name() {
                 return textView_name;
+            }
+
+            @Override
+            public void onCreateContextMenu(ContextMenu contextMenu,View view,ContextMenu.ContextMenuInfo contextMenuInfo){
+                MenuItem addMt=contextMenu.add(Menu.NONE,1,1,"Add");
+                MenuItem delMt=contextMenu.add(Menu.NONE,2,2,"Delete");
+
+                //对菜单点击设置监听回调
+                addMt.setOnMenuItemClickListener(this);
+                delMt.setOnMenuItemClickListener(this);
+            }
+
+            @Override
+            public boolean onMenuItemClick(MenuItem menuItem){
+                int position=getAdapterPosition();
+                switch(menuItem.getItemId()){
+                    case 1:
+                        View addView=LayoutInflater.from(BookListMainActivity.this).inflate(R.layout.add_item,null);
+                        AlertDialog.Builder addBulier=new AlertDialog.Builder(BookListMainActivity.this);
+                        addBulier.setView(addView);
+                        addBulier.setTitle("Add");
+                        addBulier.setPositiveButton("Sure", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                EditText editName=addView.findViewById(R.id.edit_text_bookName);
+                                EditText editImage=addView.findViewById(R.id.edit_text_imageName);
+                                Context baseContext=getBaseContext();
+                                int id = getResources().getIdentifier(baseContext.getPackageName() + ":drawable/" + editImage.getText().toString(), null, null);
+                                if (id == 0){
+                                    AlertDialog.Builder error=new AlertDialog.Builder( BookListMainActivity.this);
+                                    error.setTitle("Warning");
+                                    error.setMessage("Error!Fail To Add");
+                                    error.setPositiveButton("Sure", new DialogInterface.OnClickListener() {
+                                        @Override
+                                        public void onClick(DialogInterface dialog, int which) {
+
+                                        }
+                                    });
+                                    error.create().show();
+                                }else{
+                                    books.add(position+1,new Book(editName.getText().toString(),id));
+                                    MyRecyclerViewAdapter.this.notifyItemInserted(position+1);
+                                    Toast.makeText(BookListMainActivity.this,"Success To Add",Toast.LENGTH_LONG).show();
+                                }
+                            }
+                        });
+                        addBulier.setCancelable(false).setNegativeButton("Esc", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+
+                            }
+                        });
+                        addBulier.create().show();
+                        break;
+                    case 2:
+                        AlertDialog.Builder delBuiler=new AlertDialog.Builder(BookListMainActivity.this);
+                        delBuiler.setTitle("Remind");
+                        delBuiler.setMessage("Sure To Delete?");
+                        delBuiler.setPositiveButton("Sure", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                books.remove(position);
+                                MyRecyclerViewAdapter.this.notifyItemRemoved(position);
+                                Toast.makeText(BookListMainActivity.this,"Success to Delete",Toast.LENGTH_LONG).show();
+                            }
+                        });
+                        delBuiler.setCancelable(false).setNegativeButton("Esc", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+
+                            }
+                        });
+                        delBuiler.create().show();
+                        break;
+                }
+                notifyDataSetChanged();
+                return false;
             }
         }
     }
