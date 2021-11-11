@@ -1,13 +1,17 @@
 package com.jnu.booklistmainactivity;
 
+import androidx.activity.result.ActivityResult;
+import androidx.activity.result.ActivityResultCallback;
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.ContextMenu;
 import android.view.LayoutInflater;
@@ -15,34 +19,71 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.EditText;
 import android.widget.ImageView;
 
 import android.widget.TextView;
 import android.widget.Toast;
 
+
 import java.util.ArrayList;
 import java.util.List;
 
 public class BookListMainActivity extends AppCompatActivity {
+    private MyRecyclerViewAdapter recyclerViewAdapter;
+    public static final int RESULT_CODE_ADD_DATA = 996;
+    private List<Book> books;
+    ActivityResultLauncher<Intent> launcherAdd=registerForActivityResult(new ActivityResultContracts.StartActivityForResult(),new ActivityResultCallback<ActivityResult>(){
+        @Override
+        public void onActivityResult(ActivityResult result) {
+            Intent data = result.getData();
+            int resultCode = result.getResultCode();
+            if (resultCode == RESULT_CODE_ADD_DATA) {
+                if (null == data)
+                    return;
+                String title= data.getStringExtra("title");
+                int position = data.getIntExtra("position", books.size());
+                books.add(position+1, new Book(title, R.drawable.book_no_name));
+                recyclerViewAdapter.notifyItemInserted(position+1);
+            }
+        }
+    });
 
+    ActivityResultLauncher<Intent> launcherEdit = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), new ActivityResultCallback<ActivityResult>() {
+        @Override
+        public void onActivityResult(ActivityResult result) {
+            Intent data = result.getData();
+            int resultCode = result.getResultCode();
+            if (resultCode == RESULT_CODE_ADD_DATA) {
+                if (null == data)
+                    return;
+                String title = data.getStringExtra("title");
+                int position = data.getIntExtra("position", books.size());
+                books.get(position).setTitle(title);
+                recyclerViewAdapter.notifyItemChanged(position);
+            }
+        }
+    });
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        List<Book> books =getListBooks();//获取资源中的对象
+        books =getListBooks();//获取资源中的对象
         RecyclerView mainRecycleView=findViewById(R.id.recycle_view_books);
         LinearLayoutManager layoutManager=new LinearLayoutManager(this);
         mainRecycleView.setLayoutManager(layoutManager);
-        mainRecycleView.setAdapter(new MyRecyclerViewAdapter(books));
+        recyclerViewAdapter=new MyRecyclerViewAdapter(books);
+        mainRecycleView.setAdapter(recyclerViewAdapter);
     }
 
     private List<Book> getListBooks(){
-        List<Book> bookList= new ArrayList<>();
-        bookList.add(new Book("软件项目管理案例教程（第4版）", R.drawable.book_2));
-        bookList.add(new Book("创新工程实践", R.drawable.book_3));
-        bookList.add(new Book("信息安全数学基础（第2版）", R.drawable.book_1));
-        return bookList;
+        if (books == null) {
+            List<Book> bookList = new ArrayList<>();
+            bookList.add(new Book("软件项目管理案例教程（第4版）", R.drawable.book_2));
+            bookList.add(new Book("创新工程实践", R.drawable.book_3));
+            bookList.add(new Book("信息安全数学基础（第2版）", R.drawable.book_1));
+            books=bookList;
+        }
+        return books;
     }
 
     private class MyRecyclerViewAdapter extends RecyclerView.Adapter {
@@ -95,52 +136,23 @@ public class BookListMainActivity extends AppCompatActivity {
             public void onCreateContextMenu(ContextMenu contextMenu,View view,ContextMenu.ContextMenuInfo contextMenuInfo){
                 MenuItem addMt=contextMenu.add(Menu.NONE,1,1,"Add");
                 MenuItem delMt=contextMenu.add(Menu.NONE,2,2,"Delete");
-
+                MenuItem editMt=contextMenu.add(Menu.NONE,3,3,"Edit");
                 //对菜单点击设置监听回调
                 addMt.setOnMenuItemClickListener(this);
                 delMt.setOnMenuItemClickListener(this);
+                editMt.setOnMenuItemClickListener(this);
             }
 
             //回调函数
             @Override
             public boolean onMenuItemClick(MenuItem menuItem){
                 int position=getAdapterPosition();
+                Intent intent;
                 switch(menuItem.getItemId()){
                     case 1://添加书籍
-                        View addView=LayoutInflater.from(BookListMainActivity.this).inflate(R.layout.add_item,null);
-                        AlertDialog.Builder addBulier=new AlertDialog.Builder(BookListMainActivity.this);
-                        addBulier.setView(addView);
-                        addBulier.setTitle("Add");
-                        addBulier.setPositiveButton("Sure", new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialog, int which) {
-                                EditText editName=addView.findViewById(R.id.edit_text_bookName);
-                                EditText editImage=addView.findViewById(R.id.edit_text_imageName);
-                                Context baseContext=getBaseContext();
-                                int id = getResources().getIdentifier(baseContext.getPackageName() + ":drawable/" + editImage.getText().toString(), null, null);
-                                if (id == 0){//资源不存在则提示错误
-                                    AlertDialog.Builder error=new AlertDialog.Builder( BookListMainActivity.this);
-                                    error.setTitle("Warning");
-                                    error.setMessage("Error!Fail To Add");
-                                    error.setPositiveButton("Sure", new DialogInterface.OnClickListener() {
-                                        @Override
-                                        public void onClick(DialogInterface dialog, int which) {
-                                        }
-                                    });
-                                    error.create().show();
-                                }else{
-                                    books.add(position+1,new Book(editName.getText().toString(),id));
-                                    MyRecyclerViewAdapter.this.notifyItemInserted(position+1);
-                                    Toast.makeText(BookListMainActivity.this,"Succeed To Add",Toast.LENGTH_LONG).show();
-                                }
-                            }
-                        });
-                        addBulier.setCancelable(false).setNegativeButton("Esc", new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialog, int which) {
-                            }
-                        });
-                        addBulier.create().show();
+                        intent = new Intent(BookListMainActivity.this, EditBookActivity.class);
+                        intent.putExtra("position", position);
+                        launcherAdd.launch(intent);
                         break;
                     case 2://删除书籍
                         AlertDialog.Builder delBuiler=new AlertDialog.Builder(BookListMainActivity.this);
@@ -151,7 +163,7 @@ public class BookListMainActivity extends AppCompatActivity {
                             public void onClick(DialogInterface dialog, int which) {
                                 books.remove(position);
                                 MyRecyclerViewAdapter.this.notifyItemRemoved(position);
-                                Toast.makeText(BookListMainActivity.this,"Success to Delete",Toast.LENGTH_LONG).show();
+                                Toast.makeText(BookListMainActivity.this,"Succeed to Delete",Toast.LENGTH_LONG).show();
                             }
                         });
                         delBuiler.setCancelable(false).setNegativeButton("Esc", new DialogInterface.OnClickListener() {
@@ -161,6 +173,12 @@ public class BookListMainActivity extends AppCompatActivity {
                             }
                         });
                         delBuiler.create().show();
+                        break;
+                    case 3://编辑
+                        intent=new Intent(BookListMainActivity.this,EditBookActivity.class);
+                        intent.putExtra("position",position);
+                        intent.putExtra("title",books.get(position).getTitle());
+                        launcherEdit.launch(intent);
                         break;
                 }
                 notifyDataSetChanged();//刷新页面

@@ -20,4 +20,7 @@ public class Book {
         return imageView;
     }
 
+    public void setTitle(String title) { Title=title; }
+
+    public void setImageView(int imageView) { this.imageView=imageView; }
 }
