@@ -25,6 +25,9 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 
+import com.jnu.booklistmainactivity.data.Book;
+import com.jnu.booklistmainactivity.data.DataBookBank;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -43,6 +46,7 @@ public class BookListMainActivity extends AppCompatActivity {
                 String title= data.getStringExtra("title");
                 int position = data.getIntExtra("position", books.size());
                 books.add(position+1, new Book(title, R.drawable.book_no_name));
+                dataBookBank.saveData();
                 recyclerViewAdapter.notifyItemInserted(position+1);
             }
         }
@@ -59,10 +63,13 @@ public class BookListMainActivity extends AppCompatActivity {
                 String title = data.getStringExtra("title");
                 int position = data.getIntExtra("position", books.size());
                 books.get(position).setTitle(title);
+                dataBookBank.saveData();
                 recyclerViewAdapter.notifyItemChanged(position);
             }
         }
     });
+    private DataBookBank dataBookBank;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -76,13 +83,8 @@ public class BookListMainActivity extends AppCompatActivity {
     }
 
     private List<Book> getListBooks(){
-        if (books == null) {
-            List<Book> bookList = new ArrayList<>();
-            bookList.add(new Book("软件项目管理案例教程（第4版）", R.drawable.book_2));
-            bookList.add(new Book("创新工程实践", R.drawable.book_3));
-            bookList.add(new Book("信息安全数学基础（第2版）", R.drawable.book_1));
-            books=bookList;
-        }
+        dataBookBank = new DataBookBank(BookListMainActivity.this);
+        books= dataBookBank.loadData();
         return books;
     }
 
@@ -163,6 +165,7 @@ public class BookListMainActivity extends AppCompatActivity {
                             public void onClick(DialogInterface dialog, int which) {
                                 books.remove(position);
                                 MyRecyclerViewAdapter.this.notifyItemRemoved(position);
+                                dataBookBank.saveData();
                                 Toast.makeText(BookListMainActivity.this,"Succeed to Delete",Toast.LENGTH_LONG).show();
                             }
                         });
