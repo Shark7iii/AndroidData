@@ -23,4 +23,5 @@ public class Book implements Serializable {
     public void setTitle(String title) { Title=title; }
 
     public void setImageView(int imageView) { this.imageView=imageView; }
+
 }
