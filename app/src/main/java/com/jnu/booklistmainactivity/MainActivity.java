@@ -10,6 +10,9 @@ import android.os.Bundle;
 
 import com.google.android.material.tabs.TabLayout;
 import com.google.android.material.tabs.TabLayoutMediator;
+import com.jnu.booklistmainactivity.fragment.BookListFragment;
+import com.jnu.booklistmainactivity.fragment.MapFragment;
+import com.jnu.booklistmainactivity.fragment.WebViewFragment;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -33,7 +36,7 @@ public class MainActivity extends AppCompatActivity {
                         tab.setText("新闻");
                         break;
                     case 2:
-                        tab.setText("卖家");
+                        tab.setText("地图");
                         break;
                 }
             }
@@ -54,8 +57,10 @@ public class MainActivity extends AppCompatActivity {
             switch(position){
                 case 0:
                     return BookListFragment.newInstance();
-                default:
+                case 1:
                     return WebViewFragment.newInstance();
+                default:
+                    return MapFragment.newInstance();
             }
         }
 

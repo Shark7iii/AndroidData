@@ -8,6 +8,8 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 
+import com.jnu.booklistmainactivity.fragment.BookListFragment;
+
 public class EditBookActivity extends AppCompatActivity {
 
     @Override
