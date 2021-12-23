@@ -11,6 +11,7 @@ import android.os.Bundle;
 import com.google.android.material.tabs.TabLayout;
 import com.google.android.material.tabs.TabLayoutMediator;
 import com.jnu.booklistmainactivity.fragment.BookListFragment;
+import com.jnu.booklistmainactivity.fragment.GameFragment;
 import com.jnu.booklistmainactivity.fragment.MapFragment;
 import com.jnu.booklistmainactivity.fragment.WebViewFragment;
 
@@ -38,6 +39,8 @@ public class MainActivity extends AppCompatActivity {
                     case 2:
                         tab.setText("地图");
                         break;
+                    case 3:
+                        tab.setText("游戏");
                 }
             }
         });
@@ -59,14 +62,16 @@ public class MainActivity extends AppCompatActivity {
                     return BookListFragment.newInstance();
                 case 1:
                     return WebViewFragment.newInstance();
-                default:
+                case 2:
                     return MapFragment.newInstance();
+                default:
+                    return GameFragment.newInstance();
             }
         }
 
         @Override
         public int getItemCount() {
-            return 3;
+            return 4;
         }
     }
 }
