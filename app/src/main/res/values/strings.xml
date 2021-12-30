@@ -1,5 +1,8 @@
 <resources>
-    <string name="app_name">BookListMainActivity</string>
+<!--    <string name="app_name">BookListMainActivity</string>-->
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="app_name">InnovationCourse</string>
+    <string name="action_settings">Settings</string>
+    <string name="title_activity_teacher_detail">TeacherDetailActivity</string>
 </resources>
